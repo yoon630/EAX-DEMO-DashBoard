@@ -1,752 +1,748 @@
-        .data-stream {
-            display: none;
-        }
-        
-        .construction-layer,
-        .execution-layer {
-            background: #ffffff;
-            border: 1px solid #ddd;
-            color: #333;
-        }
-        
-        .construction-layer .reasoning-step {
-            background: rgba(0,0,0,0.05);
-            color: #333;
-        }
-        
-        .execution-layer .action-timeline,
-        .execution-layer .system-health {
-            background: rgba(0,0,0,0.05);
-            color: #333;
-        }
-        
-        .execution-layer .action-item {
-            background: rgba(0,0,0,0.03);
-            color: #333;
-        }
-        
-        .execution-layer .action-title,
-        .execution-layer .detail-label {
-            color: #ff8c42;
-        }<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Agent 예측형 생산최적화 시스템</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-            color: #ffffff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow-x: hidden;
-        }
-        
-        .header {
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            padding: 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.2);
-        }
-        
-        .header h1 {
-            text-align: center;
-            font-size: 28px;
-            font-weight: 300;
-            margin-bottom: 10px;
-        }
-        
-        .ai-status {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .status-indicator {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #ff8c42;
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.7; transform: scale(1.2); }
-            100% { opacity: 1; transform: scale(1); }
-        }
-        
-        .main-container {
-            display: grid;
-            grid-template-rows: 1fr 1fr 1fr;
-            height: calc(100vh - 100px);
-            gap: 20px;
-            padding: 20px;
-        }
-        
-        /* Design Layer - Knowledge Architecture */
-        .knowledge-layer {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 15px;
-            padding: 20px;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .layer-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 15px;
-            opacity: 1;
-        }
-        
-        .knowledge-layer .layer-title {
-            color: #ffffff !important;
-        }
-        
-        .construction-layer .layer-title,
-        .execution-layer .layer-title {
-            color: #333 !important;
-        }
-        
-        .prediction-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 15px;
-            height: calc(100% - 50px);
-        }
-        
-        .prediction-card {
-            background: rgba(255,255,255,0.05);
-            border-radius: 10px;
-            padding: 15px;
-            border: 1px solid rgba(255,255,255,0.1);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .prediction-card h3 {
-            font-size: 14px;
-            margin-bottom: 10px;
-            color: #93c572;
-        }
-        
-        .metric-value {
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-        
-        .metric-trend {
-            font-size: 12px;
-            opacity: 0.8;
-        }
-        
-        .trend-up { color: #ff6b6b; }
-        .trend-down { color: #51cf66; }
-        .trend-stable { color: #ffd43b; }
-        
-        /* Knowledge Construction Layer */
-        .construction-layer {
-            background: linear-gradient(135deg, rgba(255, 140, 66, 0.25), rgba(255, 140, 66, 0.08));
-            border: 1px solid rgba(255, 140, 66, 0.4);
-            border-radius: 15px;
-            padding: 20px;
-            position: relative;
-        }
-        
-        .reasoning-flow {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            height: calc(100% - 50px);
-        }
-        
-        .reasoning-step {
-            flex: 1;
-            background: rgba(255,255,255,0.05);
-            border-radius: 10px;
-            padding: 15px;
-            text-align: center;
-            position: relative;
-            border: 2px solid transparent;
-            transition: all 0.5s ease;
-        }
-        
-        .reasoning-step.active {
-            border-color: #ff8c42;
-            background: rgba(255, 140, 66, 0.1);
-            transform: scale(1.05);
-        }
-        
-        .step-icon {
-            width: 40px;
-            height: 40px;
-            margin: 0 auto 10px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            background: rgba(255, 255, 255, 0.1);
-        }
-        
-        .reasoning-step.active .step-icon {
-            background: rgba(255, 255, 255, 0.2);
-        }
-        
-        .reasoning-arrow {
-            width: 30px;
-            height: 2px;
-            background: #ff8c42;
-            position: relative;
-            opacity: 0.8;
-        }
-        
-        .reasoning-arrow::after {
-            content: '';
-            position: absolute;
-            right: -8px;
-            top: -3px;
-            width: 0;
-            height: 0;
-            border-left: 8px solid #ff8c42;
-            border-top: 4px solid transparent;
-            border-bottom: 4px solid transparent;
-        }
-        
-        /* Execution Layer */
-        .execution-layer {
-            background: linear-gradient(135deg, rgba(255, 140, 66, 0.2), rgba(255, 140, 66, 0.05));
-            border: 1px solid rgba(255, 140, 66, 0.3);
-            border-radius: 15px;
-            padding: 20px;
-        }
-        
-        .execution-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 20px;
-            height: calc(100% - 50px);
-        }
-        
-        .action-timeline {
-            background: rgba(255,255,255,0.05);
-            border-radius: 10px;
-            padding: 15px;
-            overflow-y: auto;
-            max-height: 100%;
-        }
-        
-        .action-item {
-            background: rgba(255, 255, 255, 0.05);
-            border-left: 4px solid #ff8c42;
-            padding: 0;
-            margin-bottom: 15px;
-            border-radius: 8px;
-            opacity: 0;
-            transform: translateX(-50px);
-            animation: slideIn 0.5s forwards;
-            overflow: hidden;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Agent 예측형 생산최적화 시스템</title>
+  <style>
+    .data-stream {
+      display: none;
+    }
+    
+    .construction-layer,
+    .execution-layer {
+      background: #ffffff;
+      border: 1px solid #ddd;
+      color: #333;
+    }
+    
+    .construction-layer .reasoning-step {
+      background: rgba(0,0,0,0.05);
+      color: #333;
+    }
+    
+    .execution-layer .action-timeline,
+    .execution-layer .system-health {
+      background: rgba(0,0,0,0.05);
+      color: #333;
+    }
+    
+    .execution-layer .action-item {
+      background: rgba(0,0,0,0.03);
+      color: #333;
+    }
+    
+    .execution-layer .action-title,
+    .execution-layer .detail-label {
+      color: #ff8c42;
+    }
 
-        .action-item:hover {
-            background: rgba(255, 255, 255, 0.08);
-            transform: scale(1.02);
-        }
-
-        .action-header {
-            padding: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .action-title {
-            font-weight: 600;
-            color: #ff8c42;
-            font-size: 14px;
-        }
-
-        .action-status {
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-size: 10px;
-            font-weight: 600;
-        }
-
-        .status-executing { background: #ffa726; color: #1a1a1a; }
-        .status-completed { background: #66bb6a; color: #1a1a1a; }
-        .status-analyzing { background: #42a5f5; color: #1a1a1a; }
-
-        .action-details {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease;
-            background: rgba(0,0,0,0.3);
-        }
-
-        .action-details.expanded {
-            max-height: 300px;
-        }
-
-        .detail-section {
-            padding: 15px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .detail-section:last-child {
-            border-bottom: none;
-        }
-
-        .detail-label {
-            font-size: 11px;
-            color: #ff8c42;
-            margin-bottom: 5px;
-            font-weight: 600;
-        }
-
-        .detail-content {
-            font-size: 12px;
-            line-height: 1.4;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 6px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 3px;
-            overflow: hidden;
-            margin-top: 5px;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #ff8c42, #ffa726);
-            border-radius: 3px;
-            transition: width 2s ease;
-        }
-
-        .expand-icon {
-            transition: transform 0.3s ease;
-            color: #ff8c42;
-        }
-
-        .action-item.expanded .expand-icon {
-            transform: rotate(180deg);
-        }
-        
-        @keyframes slideIn {
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-        
-
-        
-        .system-health {
-            background: rgba(255,255,255,0.05);
-            border-radius: 10px;
-            padding: 15px;
-        }
-        
-        .health-metric {
-            margin-bottom: 15px;
-        }
-        
-        .health-label {
-            font-size: 12px;
-            margin-bottom: 5px;
-            opacity: 0.8;
-        }
-        
-        .health-bar {
-            width: 100%;
-            height: 8px;
-            background: rgba(255,255,255,0.08);
-            border-radius: 4px;
-            overflow: hidden;
-        }
-        
-        .health-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #ff8c42, #ffa726);
-            border-radius: 4px;
-            transition: width 2s ease;
-        }
-        
-        .neural-bg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0.1;
-            z-index: -1;
-        }
-        
-        .neural-node {
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            background: currentColor;
-            border-radius: 50%;
-            animation: float 4s ease-in-out infinite;
-        }
-        
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
-        
-        .data-stream {
-            display: none;
-        }
-        
-        @keyframes blink {
-            0%, 50% { opacity: 0.6; }
-            25%, 75% { opacity: 1; }
-        }
-    </style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+      color: #ffffff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow-x: hidden;
+    }
+    
+    .header {
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      padding: 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+    }
+    
+    .header h1 {
+      text-align: center;
+      font-size: 28px;
+      font-weight: 300;
+      margin-bottom: 10px;
+    }
+    
+    .ai-status {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .status-indicator {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #ff8c42;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.7; transform: scale(1.2); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    
+    .main-container {
+      display: grid;
+      grid-template-rows: 1fr 1fr 1fr;
+      height: calc(100vh - 100px);
+      gap: 20px;
+      padding: 20px;
+    }
+    
+    /* Design Layer - Knowledge Architecture */
+    .knowledge-layer {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 15px;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .layer-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      opacity: 1;
+    }
+    
+    .knowledge-layer .layer-title {
+      color: #ffffff !important;
+    }
+    
+    .construction-layer .layer-title,
+    .execution-layer .layer-title {
+      color: #333 !important;
+    }
+    
+    .prediction-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 15px;
+      height: calc(100% - 50px);
+    }
+    
+    .prediction-card {
+      background: rgba(255,255,255,0.05);
+      border-radius: 10px;
+      padding: 15px;
+      border: 1px solid rgba(255,255,255,0.1);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .prediction-card h3 {
+      font-size: 14px;
+      margin-bottom: 10px;
+      color: #93c572;
+    }
+    
+    .metric-value {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    
+    .metric-trend {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+    
+    .trend-up { color: #ff6b6b; }
+    .trend-down { color: #51cf66; }
+    .trend-stable { color: #ffd43b; }
+    
+    /* Knowledge Construction Layer */
+    .construction-layer {
+      background: linear-gradient(135deg, rgba(255, 140, 66, 0.25), rgba(255, 140, 66, 0.08));
+      border: 1px solid rgba(255, 140, 66, 0.4);
+      border-radius: 15px;
+      padding: 20px;
+      position: relative;
+    }
+    
+    .reasoning-flow {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      height: calc(100% - 50px);
+    }
+    
+    .reasoning-step {
+      flex: 1;
+      background: rgba(255,255,255,0.05);
+      border-radius: 10px;
+      padding: 15px;
+      text-align: center;
+      position: relative;
+      border: 2px solid transparent;
+      transition: all 0.5s ease;
+    }
+    
+    .reasoning-step.active {
+      border-color: #ff8c42;
+      background: rgba(255, 140, 66, 0.1);
+      transform: scale(1.05);
+    }
+    
+    .step-icon {
+      width: 40px;
+      height: 40px;
+      margin: 0 auto 10px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .reasoning-step.active .step-icon {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .reasoning-arrow {
+      width: 30px;
+      height: 2px;
+      background: #ff8c42;
+      position: relative;
+      opacity: 0.8;
+    }
+    
+    .reasoning-arrow::after {
+      content: '';
+      position: absolute;
+      right: -8px;
+      top: -3px;
+      width: 0;
+      height: 0;
+      border-left: 8px solid #ff8c42;
+      border-top: 4px solid transparent;
+      border-bottom: 4px solid transparent;
+    }
+    
+    /* Execution Layer */
+    .execution-layer {
+      background: linear-gradient(135deg, rgba(255, 140, 66, 0.2), rgba(255, 140, 66, 0.05));
+      border: 1px solid rgba(255, 140, 66, 0.3);
+      border-radius: 15px;
+      padding: 20px;
+    }
+    
+    .execution-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+      height: calc(100% - 50px);
+    }
+    
+    .action-timeline {
+      background: rgba(255,255,255,0.05);
+      border-radius: 10px;
+      padding: 15px;
+      overflow-y: auto;
+      max-height: 100%;
+    }
+    
+    .action-item {
+      background: rgba(255, 255, 255, 0.05);
+      border-left: 4px solid #ff8c42;
+      padding: 0;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      opacity: 0;
+      transform: translateX(-50px);
+      animation: slideIn 0.5s forwards;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .action-item:hover {
+      background: rgba(255, 255, 255, 0.08);
+      transform: scale(1.02);
+    }
+    
+    .action-header {
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .action-title {
+      font-weight: 600;
+      color: #ff8c42;
+      font-size: 14px;
+    }
+    
+    .action-status {
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 10px;
+      font-weight: 600;
+    }
+    
+    .status-executing { background: #ffa726; color: #1a1a1a; }
+    .status-completed { background: #66bb6a; color: #1a1a1a; }
+    .status-analyzing { background: #42a5f5; color: #1a1a1a; }
+    
+    .action-details {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      background: rgba(0,0,0,0.3);
+    }
+    
+    .action-details.expanded {
+      max-height: 300px;
+    }
+    
+    .detail-section {
+      padding: 15px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .detail-section:last-child {
+      border-bottom: none;
+    }
+    
+    .detail-label {
+      font-size: 11px;
+      color: #ff8c42;
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+    
+    .detail-content {
+      font-size: 12px;
+      line-height: 1.4;
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 5px;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ff8c42, #ffa726);
+      border-radius: 3px;
+      transition: width 2s ease;
+    }
+    
+    .expand-icon {
+      transition: transform 0.3s ease;
+      color: #ff8c42;
+    }
+    
+    .action-item.expanded .expand-icon {
+      transform: rotate(180deg);
+    }
+    
+    @keyframes slideIn {
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    .system-health {
+      background: rgba(255,255,255,0.05);
+      border-radius: 10px;
+      padding: 15px;
+    }
+    
+    .health-metric {
+      margin-bottom: 15px;
+    }
+    
+    .health-label {
+      font-size: 12px;
+      margin-bottom: 5px;
+      opacity: 0.8;
+    }
+    
+    .health-bar {
+      width: 100%;
+      height: 8px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    
+    .health-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ff8c42, #ffa726);
+      border-radius: 4px;
+      transition: width 2s ease;
+    }
+    
+    .neural-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.1;
+      z-index: -1;
+    }
+    
+    .neural-node {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: currentColor;
+      border-radius: 50%;
+      animation: float 4s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    @keyframes blink {
+      0%, 50% { opacity: 0.6; }
+      25%, 75% { opacity: 1; }
+    }
+  </style>
 </head>
 <body>
-    <div class="header">
-        <h1>🤖 AI Agent 예측형 생산최적화 시스템</h1>
-        <div class="ai-status">
-            <div class="status-indicator"></div>
-            <span>AI Agent 자율 운영 중</span>
+  <div class="header">
+    <h1>🤖 AI Agent 예측형 생산최적화 시스템</h1>
+    <div class="ai-status">
+      <div class="status-indicator"></div>
+      <span>AI Agent 자율 운영 중</span>
+    </div>
+  </div>
+  
+  <div class="main-container">
+    <!-- Design Layer: Knowledge Architecture -->
+    <div class="knowledge-layer">
+      <div class="neural-bg" id="neuralBg1"></div>
+      <div class="data-stream">Knowledge Graph 실시간 업데이트...</div>
+      <h2 class="layer-title">🧠 지식 계층: 예측 분석</h2>
+      <div class="prediction-grid">
+        <div class="prediction-card">
+          <h3>설비 고장 예측</h3>
+          <div class="metric-value" id="failurePred">98.2%</div>
+          <div class="metric-trend trend-down">↓ 정상 운영 예상</div>
         </div>
+        <div class="prediction-card">
+          <h3>품질 이상 감지</h3>
+          <div class="metric-value" id="qualityScore">94.7%</div>
+          <div class="metric-trend trend-up">↑ 품질 개선 중</div>
+        </div>
+        <div class="prediction-card">
+          <h3>생산량 최적화</h3>
+          <div class="metric-value" id="optimization">127%</div>
+          <div class="metric-trend trend-up">↑ 목표 대비 초과달성</div>
+        </div>
+      </div>
     </div>
     
-    <div class="main-container">
-        <!-- Design Layer: Knowledge Architecture -->
-        <div class="knowledge-layer">
-            <div class="neural-bg" id="neuralBg1"></div>
-            <div class="data-stream">Knowledge Graph 실시간 업데이트...</div>
-            <h2 class="layer-title">🧠 지식 계층: 예측 분석</h2>
-            <div class="prediction-grid">
-                <div class="prediction-card">
-                    <h3>설비 고장 예측</h3>
-                    <div class="metric-value" id="failurePred">98.2%</div>
-                    <div class="metric-trend trend-down">↓ 정상 운영 예상</div>
-                </div>
-                <div class="prediction-card">
-                    <h3>품질 이상 감지</h3>
-                    <div class="metric-value" id="qualityScore">94.7%</div>
-                    <div class="metric-trend trend-up">↑ 품질 개선 중</div>
-                </div>
-                <div class="prediction-card">
-                    <h3>생산량 최적화</h3>
-                    <div class="metric-value" id="optimization">127%</div>
-                    <div class="metric-trend trend-up">↑ 목표 대비 초과달성</div>
-                </div>
-            </div>
+    <!-- Knowledge Layer: Knowledge Construction -->
+    <div class="construction-layer">
+      <div class="neural-bg" id="neuralBg2"></div>
+      <div class="data-stream">AI 추론 엔진 가동 중...</div>
+      <h2 class="layer-title">⚙️ 지식 구축: AI 추론 과정</h2>
+      <div class="reasoning-flow">
+        <div class="reasoning-step" id="step1">
+          <div class="step-icon">👁️</div>
+          <div>데이터 수집</div>
+          <small>센서 신호 분석</small>
         </div>
-        
-        <!-- Knowledge Layer: Knowledge Construction -->
-        <div class="construction-layer">
-            <div class="neural-bg" id="neuralBg2"></div>
-            <div class="data-stream">AI 추론 엔진 가동 중...</div>
-            <h2 class="layer-title">⚙️ 지식 구축: AI 추론 과정</h2>
-            <div class="reasoning-flow">
-                <div class="reasoning-step" id="step1">
-                    <div class="step-icon">👁️</div>
-                    <div>데이터 수집</div>
-                    <small>센서 신호 분석</small>
-                </div>
-                <div class="reasoning-arrow"></div>
-                <div class="reasoning-step" id="step2">
-                    <div class="step-icon">🧮</div>
-                    <div>패턴 인식</div>
-                    <small>이상징후 탐지</small>
-                </div>
-                <div class="reasoning-arrow"></div>
-                <div class="reasoning-step" id="step3">
-                    <div class="step-icon">🎯</div>
-                    <div>예측 생성</div>
-                    <small>미래 상황 예측</small>
-                </div>
-                <div class="reasoning-arrow"></div>
-                <div class="reasoning-step" id="step4">
-                    <div class="step-icon">⚡</div>
-                    <div>액션 결정</div>
-                    <small>최적 조치 선택</small>
-                </div>
-            </div>
+        <div class="reasoning-arrow"></div>
+        <div class="reasoning-step" id="step2">
+          <div class="step-icon">🧮</div>
+          <div>패턴 인식</div>
+          <small>이상징후 탐지</small>
         </div>
-        
-        <!-- Execution Layer: Autonomous Execution -->
-        <div class="execution-layer">
-            <div class="neural-bg" id="neuralBg3"></div>
-            <div class="data-stream">자율 실행 시스템 활성화...</div>
-            <h2 class="layer-title">🚀 실행 계층: 자율 액션</h2>
-            <div class="execution-grid">
-                <div class="action-timeline" id="actionTimeline">
-                    <!-- 동적으로 생성될 액션들 -->
-                </div>
-                <div class="system-health">
-                    <h3 style="margin-bottom: 15px;">시스템 상태</h3>
-                    <div class="health-metric">
-                        <div class="health-label">생산 효율성</div>
-                        <div class="health-bar">
-                            <div class="health-fill" id="efficiency" style="width: 92%"></div>
-                        </div>
-                    </div>
-                    <div class="health-metric">
-                        <div class="health-label">설비 가동률</div>
-                        <div class="health-bar">
-                            <div class="health-fill" id="uptime" style="width: 98%"></div>
-                        </div>
-                    </div>
-                    <div class="health-metric">
-                        <div class="health-label">품질 지수</div>
-                        <div class="health-bar">
-                            <div class="health-fill" id="quality" style="width: 95%"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="reasoning-arrow"></div>
+        <div class="reasoning-step" id="step3">
+          <div class="step-icon">🎯</div>
+          <div>예측 생성</div>
+          <small>미래 상황 예측</small>
         </div>
+        <div class="reasoning-arrow"></div>
+        <div class="reasoning-step" id="step4">
+          <div class="step-icon">⚡</div>
+          <div>액션 결정</div>
+          <small>최적 조치 선택</small>
+        </div>
+      </div>
     </div>
     
-    <script>
-        // AI Agent 자율 동작 시뮬레이션
-        
-        // 신경망 배경 생성
-        function createNeuralNetwork(containerId) {
-            const container = document.getElementById(containerId);
-            for (let i = 0; i < 20; i++) {
-                const node = document.createElement('div');
-                node.className = 'neural-node';
-                node.style.left = Math.random() * 100 + '%';
-                node.style.top = Math.random() * 100 + '%';
-                node.style.animationDelay = Math.random() * 4 + 's';
-                container.appendChild(node);
-            }
+    <!-- Execution Layer: Autonomous Execution -->
+    <div class="execution-layer">
+      <div class="neural-bg" id="neuralBg3"></div>
+      <div class="data-stream">자율 실행 시스템 활성화...</div>
+      <h2 class="layer-title">🚀 실행 계층: 자율 액션</h2>
+      <div class="execution-grid">
+        <div class="action-timeline" id="actionTimeline">
+          <!-- 동적으로 생성될 액션들 -->
+        </div>
+        <div class="system-health">
+          <h3 style="margin-bottom: 15px;">시스템 상태</h3>
+          <div class="health-metric">
+            <div class="health-label">생산 효율성</div>
+            <div class="health-bar">
+              <div class="health-fill" id="efficiency" style="width: 92%"></div>
+            </div>
+          </div>
+          <div class="health-metric">
+            <div class="health-label">설비 가동률</div>
+            <div class="health-bar">
+              <div class="health-fill" id="uptime" style="width: 98%"></div>
+            </div>
+          </div>
+          <div class="health-metric">
+            <div class="health-label">품질 지수</div>
+            <div class="health-bar">
+              <div class="health-fill" id="quality" style="width: 95%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // AI Agent 자율 동작 시뮬레이션
+    
+    // 신경망 배경 생성
+    function createNeuralNetwork(containerId) {
+      const container = document.getElementById(containerId);
+      for (let i = 0; i < 20; i++) {
+        const node = document.createElement('div');
+        node.className = 'neural-node';
+        node.style.left = Math.random() * 100 + '%';
+        node.style.top = Math.random() * 100 + '%';
+        node.style.animationDelay = Math.random() * 4 + 's';
+        container.appendChild(node);
+      }
+    }
+    
+    // 추론 과정 애니메이션
+    function runReasoningCycle() {
+      const steps = ['step1', 'step2', 'step3', 'step4'];
+      let currentStep = 0;
+      
+      // 모든 스텝 비활성화
+      steps.forEach(step => {
+        document.getElementById(step).classList.remove('active');
+      });
+      
+      function activateNextStep() {
+        if (currentStep < steps.length) {
+          document.getElementById(steps[currentStep]).classList.add('active');
+          currentStep++;
+          setTimeout(activateNextStep, 1500);
+        } else {
+          // 사이클 완료 후 새 액션 추가
+          addNewAction();
+          setTimeout(() => {
+            currentStep = 0;
+            runReasoningCycle();
+          }, 2000);
         }
-        
-        // 추론 과정 애니메이션
-        function runReasoningCycle() {
-            const steps = ['step1', 'step2', 'step3', 'step4'];
-            let currentStep = 0;
-            
-            // 모든 스텝 비활성화
-            steps.forEach(step => {
-                document.getElementById(step).classList.remove('active');
-            });
-            
-            function activateNextStep() {
-                if (currentStep < steps.length) {
-                    document.getElementById(steps[currentStep]).classList.add('active');
-                    currentStep++;
-                    setTimeout(activateNextStep, 1500);
-                } else {
-                    // 사이클 완료 후 새 액션 추가
-                    addNewAction();
-                    setTimeout(() => {
-                        currentStep = 0;
-                        runReasoningCycle();
-                    }, 2000);
-                }
-            }
-            
-            activateNextStep();
+      }
+      
+      activateNextStep();
+    }
+    
+    // 액션 타임라인에 새 항목 추가
+    function addNewAction() {
+      const actions = [
+        {
+          title: '📱 작업자 긴급 알림 발송',
+          status: 'completed',
+          time: new Date().toLocaleTimeString('ko-KR'),
+          aiReason: '라인 2 진동센서 임계치 120% 초과 감지',
+          confidence: '92%',
+          details: {
+            sensor: '진동센서 L2-V001: 4.2G → 4.8G (+14%)',
+            prediction: '12시간 내 베어링 고장 확률 92%',
+            recipients: '김정비 팀장, 이기술 엔지니어, 박관리 부장',
+            response: '김정비 팀장 확인완료 (2분 후), 14:00 정비 스케줄링'
+          },
+          progress: 100
+        },
+        {
+          title: '📊 실시간 생산계획 재수립',
+          status: 'executing',
+          time: new Date().toLocaleTimeString('ko-KR'),
+          aiReason: '긴급 주문 3건 접수 + 원자재 도착 지연',
+          confidence: '96%',
+          details: {
+            optimization: '기존 대비 효율 +23%, 납기 준수율 99.2%',
+            changes: '제품 A: 07:00→09:30, 제품 B 우선순위 상향',
+            impact: '3개 협력업체 일정 자동 조정',
+            savings: '에너지 비용 -12%, 인건비 -8%'
+          },
+          progress: 75
+        },
+        {
+          title: '🎛️ 스마트 파라미터 자동 조정',
+          status: 'analyzing',
+          time: new Date().toLocaleTimeString('ko-KR'),
+          aiReason: '품질지수 87.2 → 목표 93.0 미달',
+          confidence: '89%',
+          details: {
+            adjustments: '온도: 65°C→63°C, 압력: 4.2→4.0bar, 속도: 850→820rpm',
+            expected: '불량률 2.1% → 1.3% (0.8%p 개선)',
+            monitoring: '실시간 품질지수 모니터링 중',
+            validation: '30분 후 효과 검증 예정'
+          },
+          progress: 45
+        },
+        {
+          title: '🔄 원자재 자동 발주 실행',
+          status: 'completed',
+          time: new Date().toLocaleTimeString('ko-KR'),
+          aiReason: '스틸 원판 재고 3일분 미만 감지',
+          confidence: '94%',
+          details: {
+            supplier: 'A사 스틸 원판 500톤 발주 완료',
+            delivery: '내일 오전 8시 도착 예정',
+            cost: '기존 대비 -5% 협상 성공',
+            buffer: '안전재고 7일분 확보'
+          },
+          progress: 100
+        },
+        {
+          title: '⚡ 에너지 사용량 최적화',
+          status: 'executing',
+          time: new Date().toLocaleTimeString('ko-KR'),
+          aiReason: '전력 요금 peak time 진입 예정',
+          confidence: '91%',
+          details: {
+            strategy: '비핵심 설비 일시 정지, 생산 라인 순차 가동',
+            savings: '예상 전력비용 절감 18%',
+            schedule: '15:00-17:00 peak time 대응',
+            backup: '긴급시 즉시 전체 가동 가능'
+          },
+          progress: 60
         }
-        
-        // 액션 타임라인에 새 항목 추가
-        function addNewAction() {
-            const actions = [
-                {
-                    title: '📱 작업자 긴급 알림 발송',
-                    status: 'completed',
-                    time: new Date().toLocaleTimeString('ko-KR'),
-                    aiReason: '라인 2 진동센서 임계치 120% 초과 감지',
-                    confidence: '92%',
-                    details: {
-                        sensor: '진동센서 L2-V001: 4.2G → 4.8G (+14%)',
-                        prediction: '12시간 내 베어링 고장 확률 92%',
-                        recipients: '김정비 팀장, 이기술 엔지니어, 박관리 부장',
-                        response: '김정비 팀장 확인완료 (2분 후), 14:00 정비 스케줄링'
-                    },
-                    progress: 100
-                },
-                {
-                    title: '📊 실시간 생산계획 재수립',
-                    status: 'executing',
-                    time: new Date().toLocaleTimeString('ko-KR'),
-                    aiReason: '긴급 주문 3건 접수 + 원자재 도착 지연',
-                    confidence: '96%',
-                    details: {
-                        optimization: '기존 대비 효율 +23%, 납기 준수율 99.2%',
-                        changes: '제품 A: 07:00→09:30, 제품 B 우선순위 상향',
-                        impact: '3개 협력업체 일정 자동 조정',
-                        savings: '에너지 비용 -12%, 인건비 -8%'
-                    },
-                    progress: 75
-                },
-                {
-                    title: '🎛️ 스마트 파라미터 자동 조정',
-                    status: 'analyzing',
-                    time: new Date().toLocaleTimeString('ko-KR'),
-                    aiReason: '품질지수 87.2 → 목표 93.0 미달',
-                    confidence: '89%',
-                    details: {
-                        adjustments: '온도: 65°C→63°C, 압력: 4.2→4.0bar, 속도: 850→820rpm',
-                        expected: '불량률 2.1% → 1.3% (0.8%p 개선)',
-                        monitoring: '실시간 품질지수 모니터링 중',
-                        validation: '30분 후 효과 검증 예정'
-                    },
-                    progress: 45
-                },
-                {
-                    title: '🔄 원자재 자동 발주 실행',
-                    status: 'completed',
-                    time: new Date().toLocaleTimeString('ko-KR'),
-                    aiReason: '스틸 원판 재고 3일분 미만 감지',
-                    confidence: '94%',
-                    details: {
-                        supplier: 'A사 스틸 원판 500톤 발주 완료',
-                        delivery: '내일 오전 8시 도착 예정',
-                        cost: '기존 대비 -5% 협상 성공',
-                        buffer: '안전재고 7일분 확보'
-                    },
-                    progress: 100
-                },
-                {
-                    title: '⚡ 에너지 사용량 최적화',
-                    status: 'executing',
-                    time: new Date().toLocaleTimeString('ko-KR'),
-                    aiReason: '전력 요금 peak time 진입 예정',
-                    confidence: '91%',
-                    details: {
-                        strategy: '비핵심 설비 일시 정지, 생산 라인 순차 가동',
-                        savings: '예상 전력비용 절감 18%',
-                        schedule: '15:00-17:00 peak time 대응',
-                        backup: '긴급시 즉시 전체 가동 가능'
-                    },
-                    progress: 60
-                }
-            ];
-            
-            const timeline = document.getElementById('actionTimeline');
-            const action = actions[Math.floor(Math.random() * actions.length)];
-            
-            const actionItem = document.createElement('div');
-            actionItem.className = 'action-item';
-            actionItem.innerHTML = `
-                <div class="action-header" onclick="toggleActionDetails(this)">
-                    <div>
-                        <div class="action-title">${action.title}</div>
-                        <div style="font-size: 11px; opacity: 0.7; margin-top: 3px;">
-                            ${action.time} | AI 신뢰도: ${action.confidence}
-                        </div>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <span class="action-status status-${action.status}">
-                            ${action.status === 'completed' ? '완료' : action.status === 'executing' ? '실행중' : '분석중'}
-                        </span>
-                        <span class="expand-icon">▼</span>
-                    </div>
-                </div>
-                <div class="action-details">
-                    <div class="detail-section">
-                        <div class="detail-label">🧠 AI 판단 근거</div>
-                        <div class="detail-content">${action.aiReason}</div>
-                    </div>
-                    <div class="detail-section">
-                        <div class="detail-label">📋 상세 내용</div>
-                        <div class="detail-content">
-                            ${Object.entries(action.details).map(([key, value]) => 
-                                `<div style="margin-bottom: 5px;">• ${value}</div>`
-                            ).join('')}
-                        </div>
-                    </div>
-                    <div class="detail-section">
-                        <div class="detail-label">⚡ 실행 진행도</div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: ${action.progress}%"></div>
-                        </div>
-                        <div style="font-size: 10px; margin-top: 3px; opacity: 0.8;">${action.progress}% 완료</div>
-                    </div>
-                </div>
-            `;
-            
-            timeline.insertBefore(actionItem, timeline.firstChild);
-            
-            // 8개 이상 쌓이면 오래된 것 제거
-            while (timeline.children.length > 8) {
-                timeline.removeChild(timeline.lastChild);
-            }
-        }
-        
-        // 액션 상세 정보 토글
-        function toggleActionDetails(header) {
-            const actionItem = header.parentElement;
-            const details = actionItem.querySelector('.action-details');
-            
-            actionItem.classList.toggle('expanded');
-            details.classList.toggle('expanded');
-        }
-        
-        // 메트릭 값 실시간 업데이트
-        function updateMetrics() {
-            const failurePred = document.getElementById('failurePred');
-            const qualityScore = document.getElementById('qualityScore');
-            const optimization = document.getElementById('optimization');
-            
-            // 약간의 랜덤 변동
-            const failureValue = 95 + Math.random() * 5;
-            const qualityValue = 92 + Math.random() * 8;
-            const optimizationValue = 120 + Math.random() * 15;
-            
-            failurePred.textContent = failureValue.toFixed(1) + '%';
-            qualityScore.textContent = qualityValue.toFixed(1) + '%';
-            optimization.textContent = optimizationValue.toFixed(0) + '%';
-        }
-        
-        // 시스템 상태 바 업데이트
-        function updateHealthBars() {
-            const efficiency = document.getElementById('efficiency');
-            const uptime = document.getElementById('uptime');
-            const quality = document.getElementById('quality');
-            
-            const efficiencyValue = 88 + Math.random() * 10;
-            const uptimeValue = 95 + Math.random() * 5;
-            const qualityValue = 90 + Math.random() * 10;
-            
-            efficiency.style.width = efficiencyValue + '%';
-            uptime.style.width = uptimeValue + '%';
-            quality.style.width = qualityValue + '%';
-        }
-        
-        // 초기화
-        document.addEventListener('DOMContentLoaded', function() {
-            // 신경망 배경 생성
-            createNeuralNetwork('neuralBg1');
-            createNeuralNetwork('neuralBg2');
-            createNeuralNetwork('neuralBg3');
-            
-            // 첫 번째 액션 추가
-            addNewAction();
-            
-            // AI 추론 사이클 시작
-            setTimeout(runReasoningCycle, 1000);
-            
-            // 정기 업데이트 시작
-            setInterval(updateMetrics, 5000);
-            setInterval(updateHealthBars, 7000);
-        });
-    </script>
+      ];
+      
+      const timeline = document.getElementById('actionTimeline');
+      const action = actions[Math.floor(Math.random() * actions.length)];
+      
+      const actionItem = document.createElement('div');
+      actionItem.className = 'action-item';
+      actionItem.innerHTML = `
+        <div class="action-header" onclick="toggleActionDetails(this)">
+          <div>
+            <div class="action-title">${action.title}</div>
+            <div style="font-size: 11px; opacity: 0.7; margin-top: 3px;">
+              ${action.time} | AI 신뢰도: ${action.confidence}
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span class="action-status status-${action.status}">
+              ${action.status === 'completed' ? '완료' : action.status === 'executing' ? '실행중' : '분석중'}
+            </span>
+            <span class="expand-icon">▼</span>
+          </div>
+        </div>
+        <div class="action-details">
+          <div class="detail-section">
+            <div class="detail-label">🧠 AI 판단 근거</div>
+            <div class="detail-content">${action.aiReason}</div>
+          </div>
+          <div class="detail-section">
+            <div class="detail-label">📋 상세 내용</div>
+            <div class="detail-content">
+              ${Object.entries(action.details).map(([key, value]) => 
+                `<div style="margin-bottom: 5px;">• ${value}</div>`
+              ).join('')}
+            </div>
+          </div>
+          <div class="detail-section">
+            <div class="detail-label">⚡ 실행 진행도</div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: ${action.progress}%"></div>
+            </div>
+            <div style="font-size: 10px; margin-top: 3px; opacity: 0.8;">${action.progress}% 완료</div>
+          </div>
+        </div>
+      `;
+      
+      timeline.insertBefore(actionItem, timeline.firstChild);
+      
+      // 8개 이상 쌓이면 오래된 것 제거
+      while (timeline.children.length > 8) {
+        timeline.removeChild(timeline.lastChild);
+      }
+    }
+    
+    // 액션 상세 정보 토글
+    function toggleActionDetails(header) {
+      const actionItem = header.parentElement;
+      const details = actionItem.querySelector('.action-details');
+      
+      actionItem.classList.toggle('expanded');
+      details.classList.toggle('expanded');
+    }
+    
+    // 메트릭 값 실시간 업데이트
+    function updateMetrics() {
+      const failurePred = document.getElementById('failurePred');
+      const qualityScore = document.getElementById('qualityScore');
+      const optimization = document.getElementById('optimization');
+      
+      // 약간의 랜덤 변동
+      const failureValue = 95 + Math.random() * 5;
+      const qualityValue = 92 + Math.random() * 8;
+      const optimizationValue = 120 + Math.random() * 15;
+      
+      failurePred.textContent = failureValue.toFixed(1) + '%';
+      qualityScore.textContent = qualityValue.toFixed(1) + '%';
+      optimization.textContent = optimizationValue.toFixed(0) + '%';
+    }
+    
+    // 시스템 상태 바 업데이트
+    function updateHealthBars() {
+      const efficiency = document.getElementById('efficiency');
+      const uptime = document.getElementById('uptime');
+      const quality = document.getElementById('quality');
+      
+      const efficiencyValue = 88 + Math.random() * 10;
+      const uptimeValue = 95 + Math.random() * 5;
+      const qualityValue = 90 + Math.random() * 10;
+      
+      efficiency.style.width = efficiencyValue + '%';
+      uptime.style.width = uptimeValue + '%';
+      quality.style.width = qualityValue + '%';
+    }
+    
+    // 초기화
+    document.addEventListener('DOMContentLoaded', function() {
+      // 신경망 배경 생성
+      createNeuralNetwork('neuralBg1');
+      createNeuralNetwork('neuralBg2');
+      createNeuralNetwork('neuralBg3');
+      
+      // 첫 번째 액션 추가
+      addNewAction();
+      
+      // AI 추론 사이클 시작
+      setTimeout(runReasoningCycle, 1000);
+      
+      // 정기 업데이트 시작
+      setInterval(updateMetrics, 5000);
+      setInterval(updateHealthBars, 7000);
+    });
+  </script>
 </body>
 </html>
